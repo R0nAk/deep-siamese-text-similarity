@@ -61,6 +61,8 @@ with graph.as_default():
             outputOneTensorOne,outputTwoTensorTwo = sess.run([outputOne, outputTwo],{graph_input_one: batchInputOne, graph_input_two: batchInputTwo, graph_input_target:batchOutput, graph_dropout_keep_prob: 1.0})
             inputHelper.dumpLSTMTrainedOutputArray(outputOneTensorOne,outputTwoTensorTwo,lstmVectorFileName)
             inputHelper.dumpQuestionIds(batchQidOne,batchQidTwo)
+            questionIdList.append(batchQidOne)
+            questionIdList.append(batchQidTwo)
 
 
 
