@@ -120,8 +120,8 @@ class InputHelper(object):
             x1.append(l[1].lower())
             x2.append(l[2].lower())
             y.append(int(l[0])) #np.array([0,1]))
-        return np.asarray(x1),np.asarray(x2),np.asarray(y)  
- 
+        return np.asarray(x1),np.asarray(x2),np.asarray(y)
+
     def batch_iter(self, data, batch_size, num_epochs, shuffle=True):
         """
         Generates a batch iterator for a dataset.
@@ -142,7 +142,7 @@ class InputHelper(object):
                 start_index = batch_num * batch_size
                 end_index = min((batch_num + 1) * batch_size, data_size)
                 yield shuffled_data[start_index:end_index]
-                
+
     def dumpValidation(self,x1_text,x2_text,y,shuffled_index,dev_idx,i):
         print("dumping validation "+str(i))
         x1_shuffled=x1_text[shuffled_index]
@@ -159,11 +159,11 @@ class InputHelper(object):
             f.close()
         del x1_dev
         del y_dev
-    
+
     # Data Preparatopn
     # ==================================================
-    
-    
+
+
     def getDataSets(self, training_paths, max_document_length, percent_dev, batch_size, is_char_based):
         if is_char_based:
             x1_text, x2_text, y=self.getTsvDataCharBased(training_paths)
@@ -201,7 +201,7 @@ class InputHelper(object):
         dev_set=(x1_dev,x2_dev,y_dev)
         gc.collect()
         return train_set,dev_set,vocab_processor,sum_no_of_batches
-    
+
     def getTestDataSet(self, data_path, vocab_path, max_document_length):
         x1_temp,x2_temp,y = self.getTsvTestData(data_path)
 
@@ -217,3 +217,53 @@ class InputHelper(object):
         gc.collect()
         return x1,x2, y
 
+    def getTestDataSetWithQuestIds(self,data_path, vocab_path, max_document_length):
+        qidOne = []
+        qidTwo = []
+        input_x1 = []
+        input_x2 = []
+        y = []
+        for line in open(data_path):
+            l = line.strip().split("\t")
+            if len(l) < 3:
+                continue
+            try:
+                qidOne.append(int(l[0]))
+                qidTwo.append(int(l[1]))
+                input_x1.append(l[2].lower())
+                input_x2.append(l[3].lower())
+                y.append(int(l[4]))
+            except:
+                print("Except : {0}".format(l))
+        # return np.asarray(x1), np.asarray(x2), np.asarray(y)
+
+        qidOne = np.asarray(qidOne)
+        qidTwo = np.asarray(qidTwo)
+        input_x1 = np.asarray(input_x1)
+        input_x2 = np.asarray(input_x2)
+        y = np.asarray(y)
+
+        # Build vocabulary
+        vocab_processor = MyVocabularyProcessor(max_document_length, min_frequency=0)
+        vocab_processor = vocab_processor.restore(vocab_path)
+
+        input_x1 = np.asarray(list(vocab_processor.transform(input_x1)))
+        input_x2 = np.asarray(list(vocab_processor.transform(input_x2)))
+        # Randomly shuffle data
+        del vocab_processor
+        return qidOne, qidTwo, input_x1, input_x2, y
+
+    def dumpLSTMTrainedOutputArray(self,outNdArrayOne, outNdArrayTwo,fileName = "lstm_output.csv"):
+        lstmFileName = fileName
+        with open(lstmFileName, "a") as file:
+            np.savetxt(file, np.asarray(outNdArrayOne))
+            np.savetxt(file, np.asarray(outNdArrayTwo))
+
+
+    def dumpQuestionIds(self,questionIdsOne, questionIdsTwo,fileName = "question_ids.csv"):
+        lstmFileName = fileName
+        with open(lstmFileName, "a") as file:
+            for qIdOne in questionIdsOne:
+                file.write("{0}\n".format(qIdOne))
+            for qIdTwo in questionIdsTwo:
+                file.write("{0}\n".format(qIdTwo))

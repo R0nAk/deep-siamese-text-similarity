@@ -196,7 +196,7 @@ with tf.Graph().as_default():
                 siameseModel.input_y: y_batch,
                 siameseModel.dropout_keep_prob: FLAGS.dropout_keep_prob,
             }
-        _, step, loss, accuracy, dist, sim, summaries = sess.run([tr_op_set, global_step, siameseModel.loss, siameseModel.accuracy, siameseModel.distance, siameseModel.temp_sim, train_summary_op],  feed_dict)
+        _, step, loss, accuracy, dist, sim,outputOne,outputTwo,summaries = sess.run([tr_op_set, global_step, siameseModel.loss, siameseModel.accuracy, siameseModel.distance, siameseModel.temp_sim,siameseModel.out1,siameseModel.out2,train_summary_op],  feed_dict)
         time_str = datetime.datetime.now().isoformat()
         print("TRAIN {}: step {}, loss {:g}, acc {:g}".format(time_str, step, loss, accuracy))
         train_summary_writer.add_summary(summaries, step)
@@ -220,7 +220,7 @@ with tf.Graph().as_default():
                 siameseModel.input_y: y_batch,
                 siameseModel.dropout_keep_prob: 1.0,
             }
-        step, loss, accuracy, sim, summaries = sess.run([global_step, siameseModel.loss, siameseModel.accuracy, siameseModel.temp_sim, dev_summary_op],  feed_dict)
+        step, loss, accuracy, sim, summaries,outputOne,OutputTwo = sess.run([global_step, siameseModel.loss, siameseModel.accuracy, siameseModel.temp_sim, dev_summary_op,siameseModel.out1,siameseModel.out2],  feed_dict)
         time_str = datetime.datetime.now().isoformat()
         print("DEV {}: step {}, loss {:g}, acc {:g}".format(time_str, step, loss, accuracy))
         dev_summary_writer.add_summary(summaries, step)

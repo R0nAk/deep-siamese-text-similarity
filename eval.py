@@ -44,6 +44,8 @@ print("\nEvaluating...\n")
 checkpoint_file = FLAGS.model
 print checkpoint_file
 graph = tf.Graph()
+inputHelper = InputHelper()
+
 with graph.as_default():
     session_conf = tf.ConfigProto(
       allow_soft_placement=FLAGS.allow_soft_placement,
@@ -67,6 +69,9 @@ with graph.as_default():
         accuracy = graph.get_operation_by_name("accuracy/accuracy").outputs[0]
 
         sim = graph.get_operation_by_name("accuracy/temp_sim").outputs[0]
+        outputOne = graph.get_operation_by_name("output/outputOne").outputs[0]
+        outputTwo = graph.get_operation_by_name("output/outputTwo").outputs[0]
+
 
         #emb = graph.get_operation_by_name("embedding/W").outputs[0]
         #embedded_chars = tf.nn.embedding_lookup(emb,input_x)
@@ -77,7 +82,8 @@ with graph.as_default():
         all_d=[]
         for db in batches:
             x1_dev_b,x2_dev_b,y_dev_b = zip(*db)
-            batch_predictions, batch_acc, batch_sim = sess.run([predictions,accuracy,sim], {input_x1: x1_dev_b, input_x2: x2_dev_b, input_y:y_dev_b, dropout_keep_prob: 1.0})
+            batch_predictions, batch_acc, batch_sim,batch_outOne,batch_outTwo = sess.run([predictions,accuracy,sim,outputOne,outputTwo], {input_x1: x1_dev_b, input_x2: x2_dev_b, input_y:y_dev_b, dropout_keep_prob: 1.0})
+            inputHelper.dumpLSTMTrainedOutputArray(batch_outOne,batch_outTwo)
             all_predictions = np.concatenate([all_predictions, batch_predictions])
             print(batch_predictions)
             all_d = np.concatenate([all_d, batch_sim])

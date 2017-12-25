@@ -68,6 +68,8 @@ class SiameseLSTM(object):
         with tf.name_scope("output"):
             self.out1=self.BiRNN(self.embedded_chars1, self.dropout_keep_prob, "side1", embedding_size, sequence_length, hidden_units)
             self.out2=self.BiRNN(self.embedded_chars2, self.dropout_keep_prob, "side2", embedding_size, sequence_length, hidden_units)
+            tf.identity(self.out1, "outputOne")
+            tf.identity(self.out2, "outputTwo")
             self.distance = tf.sqrt(tf.reduce_sum(tf.square(tf.subtract(self.out1,self.out2)),1,keep_dims=True))
             self.distance = tf.div(self.distance, tf.add(tf.sqrt(tf.reduce_sum(tf.square(self.out1),1,keep_dims=True)),tf.sqrt(tf.reduce_sum(tf.square(self.out2),1,keep_dims=True))))
             self.distance = tf.reshape(self.distance, [-1], name="distance")
