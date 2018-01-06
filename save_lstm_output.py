@@ -66,8 +66,7 @@ with graph.as_default():
 
 ##################################################################################################################################
 # Once model is trained,All Question text gets converted into vector form and dump is taken in lstmVectorFileName file.
-# For finding most similar questions, below code finds nearest neigbour(euclidian distance)
-# Below code need to be replaced(using angular distance api-cosine)
+# For finding most similar questions, below code checks nearest neighbour based on cosine similarity
 ##################################################################################################################################
 lstmVectorOutput = np.loadtxt(lstmVectorFileName,dtype=float)
 tree = AnnoyIndex(len(lstmVectorOutput[0]))
