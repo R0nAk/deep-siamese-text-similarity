@@ -2,7 +2,7 @@ import os
 import tensorflow as tf
 from input_helpers import InputHelper
 import numpy as np
-from scipy import spatial
+from annoy import AnnoyIndex
 
 def getMetaFilePath(checkPointDir):
     meta_files = []
@@ -16,13 +16,11 @@ def getMetaFilePath(checkPointDir):
 ##############################################################################################################################
 # under runs directory check latest checkpoint directory and get its .meta file
 ##############################################################################################################################
-checkPoint = "1514142604"
+checkPoint = "1515174166"
 metaFilePath = getMetaFilePath(checkPoint)
 vocabFilePath = "runs/{0}/checkpoints/vocab".format(checkPoint)
 lstmVectorFileName = "lstm_vector_output_{}".format(checkPoint)
 batch_size = 64
-#print(getMetaFilePath(checkPoint))
-#print(vocabFilePath)
 
 inputHelper = InputHelper()
 ###############################################################################################
@@ -71,14 +69,17 @@ with graph.as_default():
 # For finding most similar questions, below code finds nearest neigbour(euclidian distance)
 # Below code need to be replaced(using angular distance api-cosine)
 ##################################################################################################################################
-print("Building KD tree now")
 lstmVectorOutput = np.loadtxt(lstmVectorFileName,dtype=float)
-tree = spatial.KDTree(lstmVectorOutput)
+tree = AnnoyIndex(len(lstmVectorOutput[0]))
+for i in xrange(len(lstmVectorOutput)):
+    tree.add_item(i,lstmVectorOutput[i])
+tree.build(20)
+
 with open("lstm_similar.txt","a") as outFile:
-    for i in xrange(lstmVectorOutput):
-        indexList = tree.query(lstmVectorOutput[i],3)[1]
-        similarQuestions = [questionIdList[index] for index in indexList]
-        outFile.write("{0}  {1}\n".format(questionIdList[i],similarQuestions))
+    for pos in xrange(len(lstmVectorOutput)):
+        indexes = tree.get_nns_by_item(pos,10)
+        similarQuestions = [questionIdList[index] for index in indexes]
+        outFile.write("{0}  {1}\n".format(questionIdList[pos], similarQuestions))
 
 
 
